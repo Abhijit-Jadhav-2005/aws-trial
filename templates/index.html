@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111827">
+    <title>PDF Buddy | Smart PDF Sharing</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <main class="app">
+        <header class="topbar">
+            <div class="brand-icon">P</div>
+            <div>
+                <h1>PDF Buddy</h1>
+                <p>AI-powered PDF assistant</p>
+            </div>
+            <span class="status">● Online</span>
+        </header>
+
+        <section class="chat-panel" aria-label="Chat conversation">
+            <div class="welcome">
+                <div class="hero-icon">📚</div>
+                <h2>What PDF do you need?</h2>
+                <p>Tell me what you're looking for, and I'll find it.</p>
+
+                <div class="suggestions">
+                    <button type="button" data-message="Find Python notes">
+                        Python notes
+                    </button>
+                    <button type="button" data-message="Find DBMS notes">
+                        DBMS notes
+                    </button>
+                    <button type="button" data-message="Find Data Structures PDF">
+                        Data Structures
+                    </button>
+                </div>
+            </div>
+
+            <div id="messages" class="messages" aria-live="polite"></div>
+
+            <div id="typing" class="typing" hidden>
+                Searching for your PDF...
+            </div>
+        </section>
+
+        <form id="chat-form" class="chat-form">
+            <label class="sr-only" for="message-input">
+                Your PDF request
+            </label>
+            <input
+                id="message-input"
+                type="text"
+                maxlength="500"
+                placeholder="Ask for a PDF..."
+                autocomplete="off"
+                required
+            >
+            <button id="send-button" type="submit">Send ↑</button>
+        </form>
+
+        <footer>
+            PDFs are provided from this website's document collection.
+        </footer>
+    </main>
+</body>
+</html>
