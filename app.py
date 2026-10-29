@@ -24,8 +24,8 @@ PDF_FOLDER = (BASE_DIR / "pdfs").resolve()
 # Create the PDF folder automatically if it doesn't exist.
 PDF_FOLDER.mkdir(parents=True, exist_ok=True)
 
-# Limit incoming request size.
-app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024  # 1 MB
+# Limit incoming request size to 1 MB.
+app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,7 +46,7 @@ def get_pdf_files():
         if path.suffix.lower() != ".pdf":
             continue
 
-        # Ignore files whose resolved parent is outside the PDF folder.
+        # Ensure the resolved file is directly inside pdfs.
         if path.resolve().parent != PDF_FOLDER:
             continue
 
@@ -75,7 +75,6 @@ def normalize_words(text):
     """Convert text into meaningful lowercase words."""
 
     words = set(re.findall(r"[a-z0-9]+", text.lower()))
-
     return words - STOP_WORDS
 
 
@@ -84,11 +83,7 @@ def normalize_words(text):
 # --------------------------------------------------
 
 def match_pdf(user_message):
-    """
-    Find the best matching PDF using its filename.
-    This function does not call Gemini, so it avoids
-    network delays for ordinary PDF searches.
-    """
+    """Match the user's request to a PDF filename."""
 
     files = get_pdf_files()
 
@@ -104,32 +99,26 @@ def match_pdf(user_message):
     best_score = 0.0
 
     for filename in files:
-        filename_words = normalize_words(
-            Path(filename).stem
-        )
+        filename_words = normalize_words(Path(filename).stem)
 
         if not filename_words:
             continue
 
         # Prefer a complete filename match.
         if filename_words.issubset(query_words):
-            score = (
-                len(filename_words) / len(query_words)
-            )
+            score = len(filename_words) / len(query_words)
 
             if score > best_score:
                 best_score = score
                 best_file = filename
 
-        # Also support a request that contains most of
-        # the filename words, without accepting weak matches.
         else:
+            # Also allow partial matches when most filename
+            # words appear in the user's request.
             matched_words = filename_words & query_words
 
             if matched_words:
-                score = (
-                    len(matched_words) / len(filename_words)
-                )
+                score = len(matched_words) / len(filename_words)
 
                 if score >= 0.75 and score > best_score:
                     best_score = score
@@ -158,7 +147,6 @@ def home():
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.get_json(silent=True) or {}
-
     message = data.get("message", "")
 
     if not isinstance(message, str):
@@ -265,8 +253,9 @@ def request_too_large(error):
 # Run the application
 # --------------------------------------------------
 
-app.run(
-    host="0.0.0.0",
-    port=5000,
-    debug=False,
-)
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=False,
+    )
